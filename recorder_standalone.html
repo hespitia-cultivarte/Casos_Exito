@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cultivarte – Grabador</title>
+<style>
+  :root { --verde:#2E7D32; --rojo:#C62828; --blanco:#FFFFFF; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:linear-gradient(160deg,#E8F5E9 0%,#F3E5F5 100%);
+    min-height:100vh; display:flex; align-items:center;
+    justify-content:center; padding:20px;
+  }
+  .card {
+    background:var(--blanco); border-radius:20px;
+    box-shadow:0 4px 32px rgba(0,0,0,.15);
+    padding:36px 28px; width:min(420px,100%); text-align:center;
+  }
+  .logo { font-size:2.8rem; margin-bottom:8px; }
+  h2   { font-size:1.2rem; color:var(--verde); font-weight:700; margin-bottom:4px; }
+  .sub { font-size:.85rem; color:#757575; margin-bottom:28px; }
+  #timer {
+    font-size:3.5rem; font-weight:800; color:var(--rojo);
+    font-variant-numeric:tabular-nums; margin:12px 0; min-height:60px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .wave-wrap {
+    height:60px; display:flex; align-items:center;
+    justify-content:center; gap:3px; margin:8px 0 20px; overflow:hidden;
+  }
+  .bar { width:5px; border-radius:3px; background:var(--rojo); height:4px; transition:height .08s ease; }
+  #status { font-size:.9rem; font-weight:600; color:#555; min-height:28px; margin-bottom:20px; }
+  audio  { width:100%; border-radius:10px; margin:16px 0; display:none; }
+  .btn-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .btn {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:13px 26px; border:none; border-radius:30px;
+    font-size:.95rem; font-weight:700; cursor:pointer; transition:all .18s;
+  }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+  .btn-red   { background:var(--rojo);  color:var(--blanco); }
+  .btn-dark  { background:#455A64;      color:var(--blanco); }
+  .btn-green { background:var(--verde); color:var(--blanco); }
+  .btn-grey  { background:#EEEEEE;      color:#424242; }
+  .btn-red:hover   { background:#B71C1C; transform:translateY(-1px); }
+  .btn-dark:hover  { background:#263238; }
+  .btn-green:hover { background:#1B5E20; transform:translateY(-1px); }
+  .dot {
+    display:inline-block; width:10px; height:10px;
+    background:currentColor; border-radius:50%; animation:blink 1s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+  #progressWrap { height:6px; background:#EEE; border-radius:3px; margin:10px 0 0; overflow:hidden; display:none; }
+  #progressBar  { height:100%; background:var(--rojo); border-radius:3px; width:0%; transition:width 1s linear; }
+  .tip { font-size:.78rem; color:#9E9E9E; margin-top:18px; line-height:1.5; }
+  #permMsg {
+    background:#FFF3E0; border:1px solid #FFB74D; border-radius:10px;
+    padding:14px 16px; font-size:.85rem; color:#E65100;
+    margin-bottom:16px; display:none; line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🎙️</div>
+  <h2>Grabador de Experiencia</h2>
+  <p class="sub">Cultivarte — máximo 5 minutos</p>
+
+  <div id="permMsg"></div>
+  <div id="timer">0:00</div>
+  <div class="wave-wrap" id="waveWrap"></div>
+  <div id="progressWrap"><div id="progressBar"></div></div>
+  <div id="status">Presiona <strong>Grabar</strong> para comenzar</div>
+  <audio id="preview" controls></audio>
+
+  <div class="btn-row" id="btnRow">
+    <button class="btn btn-red" onclick="iniciarGrabacion()">
+      <span class="dot" style="background:#fff"></span> Grabar
+    </button>
+  </div>
+  <p class="tip" id="tip">Esta ventana se cerrará automáticamente al confirmar el audio.</p>
+</div>
+
+<script>
+const MAX_SEG = 300;
+let mediaRecorder=null, audioChunks=[], micStream=null;
+let analyser=null, animInterval=null, timerInterval=null;
+let segundos=0, audioBlob=null;
+
+// Crear barras waveform
+const ww = document.getElementById('waveWrap');
+for(let i=0;i<34;i++){const b=document.createElement('div');b.className='bar';ww.appendChild(b);}
+
+// Detectar origen permitido desde URL
+function getOpenerOrigin() {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    return p.get('origin') || '*';
+  } catch(e) { return '*'; }
+}
+const ALLOWED_ORIGIN = getOpenerOrigin();
+
+async function iniciarGrabacion() {
+  document.getElementById('permMsg').style.display = 'none';
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio:true, video:false });
+  } catch(err) {
+    let msg = '';
+    if (err.name==='NotAllowedError'||err.name==='PermissionDeniedError') {
+      msg = `
+        <strong>⚠️ Permiso de micrófono bloqueado</strong><br><br>
+        Haz clic en el ícono <strong>🔒</strong> o <strong>🎙️</strong> en la barra 
+        de dirección del navegador → selecciona 
+        <strong>"Configuración del sitio"</strong> → cambia 
+        <strong>Micrófono</strong> a <strong>Permitir</strong> → 
+        recarga esta ventana y vuelve a intentarlo.
+      `;
+    } else if(err.name==='NotFoundError') {
+      msg = '❌ No se detectó micrófono en este dispositivo.';
+    } else {
+      msg = '❌ Error: ' + err.message;
+    }
+    const el = document.getElementById('permMsg');
+    el.innerHTML = msg; el.style.display = 'block';
+    return;
+  }
+
+  // Visualizer
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const src = ctx.createMediaStreamSource(micStream);
+    analyser = ctx.createAnalyser(); analyser.fftSize=64;
+    src.connect(analyser); iniciarWave();
+  } catch(_) { iniciarWaveFake(); }
+
+  // MediaRecorder
+  const mime = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4','']
+    .find(m => m===''||MediaRecorder.isTypeSupported(m));
+  audioChunks=[];
+  mediaRecorder = new MediaRecorder(micStream, mime?{mimeType:mime}:{});
+  mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = alDetener;
+  mediaRecorder.start(200);
+
+  // Timer
+  segundos=0;
+  const timerEl=document.getElementById('timer');
+  const bar=document.getElementById('progressBar');
+  document.getElementById('progressWrap').style.display='block';
+  timerInterval = setInterval(()=>{
+    segundos++;
+    timerEl.textContent = fmt(segundos);
+    bar.style.width = (segundos/MAX_SEG*100)+'%';
+    if(segundos>=MAX_SEG) detenerGrabacion();
+  },1000);
+
+  setStatus('<span class="dot"></span>&nbsp; Grabando…');
+  setBtns('<button class="btn btn-dark" onclick="detenerGrabacion()">⏹ Detener</button>');
+  document.getElementById('tip').textContent='Habla con claridad. Máximo 5 minutos.';
+}
+
+function detenerGrabacion() {
+  if(mediaRecorder&&mediaRecorder.state!=='inactive') mediaRecorder.stop();
+  pararMic(); clearInterval(timerInterval); pararWave();
+}
+
+function alDetener() {
+  const mime=(mediaRecorder&&mediaRecorder.mimeType)||'audio/webm';
+  audioBlob = new Blob(audioChunks,{type:mime});
+  const url = URL.createObjectURL(audioBlob);
+  const prev = document.getElementById('preview');
+  prev.src=url; prev.style.display='block';
+  setStatus('✅ Grabación lista — escúchala antes de confirmar');
+  setBtns(
+    '<button class="btn btn-green" onclick="confirmar()">✅ Usar este audio</button>'+
+    '<button class="btn btn-red"   onclick="grabarDeNuevo()">🔄 De nuevo</button>'+
+    '<button class="btn btn-grey"  onclick="cancelar()">✕ Cancelar</button>'
+  );
+  document.getElementById('tip').textContent='Al confirmar, el audio se adjuntará al formulario.';
+}
+
+function grabarDeNuevo() {
+  audioBlob=null;
+  const prev=document.getElementById('preview');
+  prev.style.display='none'; prev.src='';
+  document.getElementById('timer').textContent='0:00';
+  document.getElementById('progressBar').style.width='0%';
+  document.getElementById('progressWrap').style.display='none';
+  setStatus('Presiona <strong>Grabar</strong> para comenzar');
+  setBtns('<button class="btn btn-red" onclick="iniciarGrabacion()"><span class="dot" style="background:#fff"></span> Grabar</button>');
+}
+
+async function confirmar() {
+  if(!audioBlob){cancelar();return;}
+  setStatus('Enviando audio al formulario…'); setBtns('');
+  const b64 = await new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=rej; r.readAsDataURL(audioBlob);
+  });
+  const mime=audioBlob.type||'audio/webm';
+  const ext=mime.includes('ogg')?'ogg':mime.includes('mp4')?'mp4':'webm';
+
+  if(window.opener&&!window.opener.closed){
+    window.opener.postMessage({
+      type:'CULTIVARTE_AUDIO', base64:b64,
+      mimeType:mime, ext:ext, duracion:segundos
+    }, ALLOWED_ORIGIN);
+  }
+  window.close();
+}
+
+function cancelar() {
+  if(window.opener&&!window.opener.closed)
+    window.opener.postMessage({type:'CULTIVARTE_AUDIO_CANCEL'}, ALLOWED_ORIGIN);
+  window.close();
+}
+
+function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function setStatus(h){document.getElementById('status').innerHTML=h;}
+function setBtns(h){document.getElementById('btnRow').innerHTML=h;}
+function pararMic(){if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null;}}
+function iniciarWave(){
+  const bars=document.querySelectorAll('.bar');
+  const data=new Uint8Array(analyser.frequencyBinCount);
+  animInterval=setInterval(()=>{
+    analyser.getByteFrequencyData(data);
+    bars.forEach((b,i)=>{b.style.height=Math.max(4,data[i%data.length]*52/255)+'px';});
+  },80);
+}
+function iniciarWaveFake(){
+  const bars=document.querySelectorAll('.bar');
+  animInterval=setInterval(()=>{
+    bars.forEach(b=>{b.style.height=Math.max(4,Math.random()*48+4)+'px';});
+  },120);
+}
+function pararWave(){clearInterval(animInterval);document.querySelectorAll('.bar').forEach(b=>b.style.height='4px');}
+</script>
+</body>
+</html>
