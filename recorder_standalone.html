@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Cultivarte – Grabador</title>
 <style>
   :root { --verde:#2E7D32; --rojo:#C62828; --blanco:#FFFFFF; }
@@ -11,16 +11,28 @@
     font-family:'Segoe UI',system-ui,sans-serif;
     background:linear-gradient(160deg,#E8F5E9 0%,#F3E5F5 100%);
     min-height:100vh; display:flex; align-items:center;
-    justify-content:center; padding:20px;
+    justify-content:center; padding:12px;
   }
   .card {
-    background:var(--blanco); border-radius:20px;
+    background:var(--blanco); border-radius:16px;
     box-shadow:0 4px 32px rgba(0,0,0,.15);
-    padding:36px 28px; width:min(420px,100%); text-align:center;
+    padding:24px 16px; width:min(480px,100%); text-align:center;
+  }
+  @media (max-width:480px) {
+    .card { padding:20px 12px; border-radius:14px; }
+    h2 { font-size:1rem; }
+    .logo { font-size:2.2rem; }
+    #timer { font-size:2.8rem; }
+    .btn { padding:11px 20px; font-size:.85rem; }
   }
   .logo { font-size:2.8rem; margin-bottom:8px; }
   h2   { font-size:1.2rem; color:var(--verde); font-weight:700; margin-bottom:4px; }
-  .sub { font-size:.85rem; color:#757575; margin-bottom:28px; }
+  .sub { font-size:.8rem; color:#757575; margin-bottom:20px; }
+  #categoryMsg {
+    background:#E3F2FD; border-left:4px solid #2196F3; border-radius:8px;
+    padding:14px 12px; font-size:.8rem; color:#1565C0; margin-bottom:16px;
+    line-height:1.5; display:none; text-align:left;
+  }
   #timer {
     font-size:3.5rem; font-weight:800; color:var(--rojo);
     font-variant-numeric:tabular-nums; margin:12px 0; min-height:60px;
@@ -68,6 +80,7 @@
   <h2>Grabador de Experiencia</h2>
   <p class="sub">Cultivarte — máximo 5 minutos</p>
 
+  <div id="categoryMsg"></div>
   <div id="permMsg"></div>
   <div id="timer">0:00</div>
   <div class="wave-wrap" id="waveWrap"></div>
@@ -93,14 +106,46 @@ let segundos=0, audioBlob=null;
 const ww = document.getElementById('waveWrap');
 for(let i=0;i<34;i++){const b=document.createElement('div');b.className='bar';ww.appendChild(b);}
 
-// Detectar origen permitido desde URL
+// Detectar origen permitido desde URL y parámetros
 function getOpenerOrigin() {
   try {
     const p = new URLSearchParams(window.location.search);
     return p.get('origin') || '*';
   } catch(e) { return '*'; }
 }
+function getCategoria() {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    return p.get('categoria') || '';
+  } catch(e) { return ''; }
+}
 const ALLOWED_ORIGIN = getOpenerOrigin();
+
+// Mostrar mensaje de categoría personalizado
+function mostrarMensajeCategoria() {
+  const categoria = getCategoria();
+  const msgEl = document.getElementById('categoryMsg');
+  
+  if (!categoria) return;
+  
+  let mensaje = '';
+  if (categoria.toLowerCase().includes('caso de éxito') || categoria.toLowerCase().includes('caso de exito')) {
+    mensaje = '✨ <strong>Casos de Éxito</strong><br>' +
+              'Cuéntanos ese caso especial que marcó la diferencia. ¿Cuál fue el impacto en esa persona? ¿Qué cambios notaste en ella? ' +
+              'Comparte su trayectoria, su historia de transformación, y los aliados o procesos que hicieron posible este éxito.';
+  } else if (categoria) {
+    mensaje = '📝 <strong>Acerca de: ' + categoria + '</strong><br>' +
+              'Recuerda que seleccionaste esta categoría. Cuéntanos con detalle tu experiencia en este tema.';
+  }
+  
+  if (mensaje) {
+    msgEl.innerHTML = mensaje;
+    msgEl.style.display = 'block';
+  }
+}
+
+// Ejecutar al cargar
+window.addEventListener('load', mostrarMensajeCategoria);
 
 async function iniciarGrabacion() {
   document.getElementById('permMsg').style.display = 'none';
