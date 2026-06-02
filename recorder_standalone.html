@@ -145,7 +145,15 @@ function mostrarMensajePersonalizado() {
               '• <strong>¿Qué cambios percibiste?</strong> Cambios en actitudes, comportamientos, oportunidades.<br>' +
               '• <strong>¿Cuál ha sido la trayectoria del beneficiario? ¿Cuál es su historia?</strong> Comparte su proceso de transformación.<br>' +
               '• <strong>¿En qué proceso o aliados participaron en esta historia?</strong> Instituciones, personas o iniciativas clave.';
-  } else if (tipoReg) {
+  }
+  // Si es Testimonio de Participante
+  else if (tipoReg.toLowerCase().includes('testimonio')) {
+    mensaje = '<strong>💬 Testimonio de Participante</strong><br><br>' +
+              'Somos muy curiosos por saber cómo te impactó participar en esta experiencia. ' +
+              'Habla de forma natural, como en una conversación... tu voz, tus sentimientos y tu perspectiva ' +
+              'son super valiosos para nosotros. 🙏';
+  }
+  else if (tipoReg) {
     mensaje = '📝 <strong>Acerca de: ' + tipoReg + '</strong><br>' +
               'Recuerda que seleccionaste esta categoría. Cuéntanos con detalle tu experiencia en este tema.';
   }
