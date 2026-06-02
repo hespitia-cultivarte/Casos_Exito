@@ -19,11 +19,13 @@
     padding:24px 16px; width:min(480px,100%); text-align:center;
   }
   @media (max-width:480px) {
-    .card { padding:20px 12px; border-radius:14px; }
-    h2 { font-size:1rem; }
+    .card { padding:16px 12px; border-radius:14px; }
+    h2 { font-size:0.95rem; }
     .logo { font-size:2.2rem; }
-    #timer { font-size:2.8rem; }
-    .btn { padding:11px 20px; font-size:.85rem; }
+    #timer { font-size:2.4rem; }
+    .btn { padding:10px 18px; font-size:0.8rem; }
+    .sub { font-size:0.75rem; }
+    #categoryMsg { font-size:0.75rem; padding:10px; }
   }
   .logo { font-size:2.8rem; margin-bottom:8px; }
   h2   { font-size:1.2rem; color:var(--verde); font-weight:700; margin-bottom:4px; }
@@ -113,6 +115,12 @@ function getOpenerOrigin() {
     return p.get('origin') || '*';
   } catch(e) { return '*'; }
 }
+function getTipoRegistro() {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    return p.get('tipoRegistro') || '';
+  } catch(e) { return ''; }
+}
 function getCategoria() {
   try {
     const p = new URLSearchParams(window.location.search);
@@ -121,20 +129,24 @@ function getCategoria() {
 }
 const ALLOWED_ORIGIN = getOpenerOrigin();
 
-// Mostrar mensaje de categoría personalizado
-function mostrarMensajeCategoria() {
+// Mostrar mensaje personalizado según el tipo de registro
+function mostrarMensajePersonalizado() {
+  const tipoReg = getTipoRegistro();
   const categoria = getCategoria();
   const msgEl = document.getElementById('categoryMsg');
   
-  if (!categoria) return;
-  
   let mensaje = '';
-  if (categoria.toLowerCase().includes('caso de éxito') || categoria.toLowerCase().includes('caso de exito')) {
-    mensaje = '✨ <strong>Casos de Éxito</strong><br>' +
-              'Cuéntanos ese caso especial que marcó la diferencia. ¿Cuál fue el impacto en esa persona? ¿Qué cambios notaste en ella? ' +
-              'Comparte su trayectoria, su historia de transformación, y los aliados o procesos que hicieron posible este éxito.';
-  } else if (categoria) {
-    mensaje = '📝 <strong>Acerca de: ' + categoria + '</strong><br>' +
+  
+  // Si es Caso de Éxito
+  if (tipoReg.toLowerCase().includes('caso de exito') || tipoReg.toLowerCase().includes('caso de éxito')) {
+    mensaje = '<strong>✨ Caso de Éxito</strong><br><br>' +
+              '<strong>Cuéntanos:</strong><br>' +
+              '• <strong>¿Cuál fue el impacto directo en el beneficiario?</strong> Describe cómo cambió su situación.<br>' +
+              '• <strong>¿Qué cambios percibiste?</strong> Cambios en actitudes, comportamientos, oportunidades.<br>' +
+              '• <strong>¿Cuál ha sido la trayectoria del beneficiario? ¿Cuál es su historia?</strong> Comparte su proceso de transformación.<br>' +
+              '• <strong>¿En qué proceso o aliados participaron en esta historia?</strong> Instituciones, personas o iniciativas clave.';
+  } else if (tipoReg) {
+    mensaje = '📝 <strong>Acerca de: ' + tipoReg + '</strong><br>' +
               'Recuerda que seleccionaste esta categoría. Cuéntanos con detalle tu experiencia en este tema.';
   }
   
@@ -145,7 +157,7 @@ function mostrarMensajeCategoria() {
 }
 
 // Ejecutar al cargar
-window.addEventListener('load', mostrarMensajeCategoria);
+window.addEventListener('load', mostrarMensajePersonalizado);
 
 async function iniciarGrabacion() {
   document.getElementById('permMsg').style.display = 'none';
