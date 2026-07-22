@@ -135,11 +135,17 @@ function mostrarMensajePersonalizado() {
   const categoria = getCategoria();
   const msgEl = document.getElementById('categoryMsg');
   
+  // Debug: mostrar valores en consola
+  console.log('Tipo de registro recibido:', tipoReg);
+  
   let mensaje = '';
   
   // Normalizar el texto para comparación (remover acentos y convertir a minúsculas)
   const tipoRegNormalizado = tipoReg.toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  console.log('Tipo normalizado:', tipoRegNormalizado);
+  console.log('¿Contiene "buena practica"?', tipoRegNormalizado.includes('buena practica'));
   
   // Buena Práctica
   if (tipoRegNormalizado.includes('buena practica')) {
