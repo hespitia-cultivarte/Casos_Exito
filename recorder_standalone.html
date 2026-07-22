@@ -137,22 +137,49 @@ function mostrarMensajePersonalizado() {
   
   let mensaje = '';
   
-  // Si es Caso de Éxito
-  if (tipoReg.toLowerCase().includes('caso de exito') || tipoReg.toLowerCase().includes('caso de éxito')) {
-    mensaje = '<strong>✨ Caso de Éxito</strong><br><br>' +
-              '<strong>Cuéntanos:</strong><br>' +
-              '• <strong>¿Cuál fue el impacto directo en el beneficiario?</strong> Describe cómo cambió su situación.<br>' +
-              '• <strong>¿Qué cambios percibiste?</strong> Cambios en actitudes, comportamientos, oportunidades.<br>' +
-              '• <strong>¿Cuál ha sido la trayectoria del beneficiario? ¿Cuál es su historia?</strong> Comparte su proceso de transformación.<br>' +
-              '• <strong>¿En qué proceso o aliados participaron en esta historia?</strong> Instituciones, personas o iniciativas clave.';
+  // Buena Práctica
+  if (tipoReg.toLowerCase().includes('buena práctica') || tipoReg.toLowerCase().includes('buena practica')) {
+    mensaje = '<strong>💡 Buena práctica</strong><br><br>' +
+              'Una buena práctica es una forma de hacer las cosas que ha demostrado generar buenos resultados y que puede replicarse o adaptarse en otros equipos, territorios o programas.<br><br>' +
+              '<em>→ Comparte aquello que funcionó bien y que recomendarías volver a hacer.</em><br><br>' +
+              '<strong>Tips/preguntas:</strong><br>' +
+              '• ¿Qué necesidad o reto buscabas resolver y por qué era importante actuar?<br>' +
+              '• ¿Qué acciones realizaron? ¿Cómo las llevaron a cabo?<br>' +
+              '• ¿Qué resultados obtuvieron? ¿Cómo sabes que funcionó?<br>' +
+              '• ¿Por qué crees que esta práctica podría servirle a otros?<br>' +
+              '• ¿Qué recomendarías a alguien que quiera implementar esta práctica?';
   }
-  // Si es Testimonio de Participante
+  // Lección Aprendida
+  else if (tipoReg.toLowerCase().includes('lección aprendida') || tipoReg.toLowerCase().includes('leccion aprendida')) {
+    mensaje = '<strong>📚 Lección aprendida</strong><br><br>' +
+              'Una lección aprendida es un aprendizaje obtenido a partir de una experiencia, un reto o un error que nos ayuda a mejorar la forma en que trabajamos y a tomar mejores decisiones en el futuro.<br><br>' +
+              '<em>→ Comparte qué aprendiste y qué harías diferente o volverías a hacer la próxima vez.</em><br><br>' +
+              '<strong>Tips/preguntas:</strong><br>' +
+              '• ¿Qué ocurrió y por qué representó un desafío?<br>' +
+              '• ¿Qué aprendieron de esa experiencia?<br>' +
+              '• ¿Qué decisiones tomaron? Cuéntanos qué empezaron a hacer diferente o qué dejaron de hacer<br>' +
+              '• ¿Se resolvió el problema? ¿Mejoró algún proceso? ¿Disminuyeron errores?<br>' +
+              '• ¿Qué recomendarías a otros equipos para que aprovechen este aprendizaje?';
+  }
+  // Caso de Éxito
+  else if (tipoReg.toLowerCase().includes('caso de exito') || tipoReg.toLowerCase().includes('caso de éxito')) {
+    mensaje = '<strong>🌟 Caso de éxito</strong><br><br>' +
+              'Un caso de éxito es una experiencia que evidencia resultados o transformaciones en los beneficiarios, alineadas con la Teoría del Cambio del programa, logradas gracias a una estrategia, metodología o intervención, y cuya historia puede inspirar o servir como referente para otros.<br><br>' +
+              '<em>→ Comparte una experiencia que demuestre qué se logró, cómo se logró y por qué fue exitosa.</em><br><br>' +
+              '<strong>Tips/preguntas:</strong><br>' +
+              '• ¿Quiénes fueron los beneficiarios y qué reto, necesidad o situación enfrentaban antes de la intervención?<br>' +
+              '• ¿Cuál fue el impacto directo en el beneficiario? Describe cómo cambió su situación.<br>' +
+              '• ¿Qué acciones fueron clave? ¿Qué hizo diferente esta experiencia?<br>' +
+              '• ¿Qué cambios percibiste? ¿Cuál ha sido la trayectoria del beneficiario? Comparte su proceso de transformación.<br>' +
+              '• ¿Qué proceso o aliados participaron en esta historia? Instituciones, personas o iniciativas clave.';
+  }
+  // Testimonio de Participante
   else if (tipoReg.toLowerCase().includes('testimonio')) {
-    mensaje = '<strong>💬 Testimonio de Participante</strong><br><br>' +
-              'Somos muy curiosos por saber cómo te impactó participar en esta experiencia. ' +
-              'Habla de forma natural, como en una conversación... tu voz, tus sentimientos y tu perspectiva ' +
-              'son super valiosos para nosotros. 🙏';
+    mensaje = '<strong>🎙️ Testimonio</strong><br><br>' +
+              'Un testimonio es el relato personal de un beneficiario, aliado o colaborador sobre cómo una experiencia, programa o proyecto impactó su vida, su trabajo o su comunidad.<br><br>' +
+              '<em>→ Comparte la voz de quienes vivieron la experiencia y lo que significó para ellos.</em>';
   }
+  // Otros tipos de registro
   else if (tipoReg) {
     mensaje = '📝 <strong>Acerca de: ' + tipoReg + '</strong><br>' +
               'Recuerda que seleccionaste esta categoría. Cuéntanos con detalle tu experiencia en este tema.';
