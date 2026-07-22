@@ -137,8 +137,12 @@ function mostrarMensajePersonalizado() {
   
   let mensaje = '';
   
+  // Normalizar el texto para comparación (remover acentos y convertir a minúsculas)
+  const tipoRegNormalizado = tipoReg.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
   // Buena Práctica
-  if (tipoReg.toLowerCase().includes('buena práctica') || tipoReg.toLowerCase().includes('buena practica')) {
+  if (tipoRegNormalizado.includes('buena practica')) {
     mensaje = '<strong>💡 Buena práctica</strong><br><br>' +
               'Una buena práctica es una forma de hacer las cosas que ha demostrado generar buenos resultados y que puede replicarse o adaptarse en otros equipos, territorios o programas.<br><br>' +
               '<em>→ Comparte aquello que funcionó bien y que recomendarías volver a hacer.</em><br><br>' +
@@ -150,7 +154,7 @@ function mostrarMensajePersonalizado() {
               '• ¿Qué recomendarías a alguien que quiera implementar esta práctica?';
   }
   // Lección Aprendida
-  else if (tipoReg.toLowerCase().includes('lección aprendida') || tipoReg.toLowerCase().includes('leccion aprendida')) {
+  else if (tipoRegNormalizado.includes('leccion aprendida')) {
     mensaje = '<strong>📚 Lección aprendida</strong><br><br>' +
               'Una lección aprendida es un aprendizaje obtenido a partir de una experiencia, un reto o un error que nos ayuda a mejorar la forma en que trabajamos y a tomar mejores decisiones en el futuro.<br><br>' +
               '<em>→ Comparte qué aprendiste y qué harías diferente o volverías a hacer la próxima vez.</em><br><br>' +
@@ -162,7 +166,7 @@ function mostrarMensajePersonalizado() {
               '• ¿Qué recomendarías a otros equipos para que aprovechen este aprendizaje?';
   }
   // Caso de Éxito
-  else if (tipoReg.toLowerCase().includes('caso de exito') || tipoReg.toLowerCase().includes('caso de éxito')) {
+  else if (tipoRegNormalizado.includes('caso de exito')) {
     mensaje = '<strong>🌟 Caso de éxito</strong><br><br>' +
               'Un caso de éxito es una experiencia que evidencia resultados o transformaciones en los beneficiarios, alineadas con la Teoría del Cambio del programa, logradas gracias a una estrategia, metodología o intervención, y cuya historia puede inspirar o servir como referente para otros.<br><br>' +
               '<em>→ Comparte una experiencia que demuestre qué se logró, cómo se logró y por qué fue exitosa.</em><br><br>' +
@@ -174,7 +178,7 @@ function mostrarMensajePersonalizado() {
               '• ¿Qué proceso o aliados participaron en esta historia? Instituciones, personas o iniciativas clave.';
   }
   // Testimonio de Participante
-  else if (tipoReg.toLowerCase().includes('testimonio')) {
+  else if (tipoRegNormalizado.includes('testimonio')) {
     mensaje = '<strong>🎙️ Testimonio</strong><br><br>' +
               'Un testimonio es el relato personal de un beneficiario, aliado o colaborador sobre cómo una experiencia, programa o proyecto impactó su vida, su trabajo o su comunidad.<br><br>' +
               '<em>→ Comparte la voz de quienes vivieron la experiencia y lo que significó para ellos.</em>';
