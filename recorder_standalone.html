@@ -127,6 +127,12 @@ function getCategoria() {
     return p.get('categoria') || '';
   } catch(e) { return ''; }
 }
+function getModo() {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    return p.get('modo') || '';
+  } catch(e) { return ''; }
+}
 const ALLOWED_ORIGIN = getOpenerOrigin();
 
 // Mostrar mensaje personalizado según el tipo de registro
@@ -137,6 +143,25 @@ function mostrarMensajePersonalizado() {
   
   // Debug: mostrar valores en consola
   console.log('Tipo de registro recibido:', tipoReg);
+
+  // Modo Aprendizajes del Evento: mostrar las preguntas guía
+  if (getModo() === 'evento') {
+    const titulo = document.querySelector('h2');
+    const subtitulo = document.querySelector('.sub');
+    if (titulo) titulo.textContent = 'Grabador de Aprendizajes';
+    if (subtitulo) subtitulo.textContent = 'Cultivarte — aprendizajes del evento (máx. 5 min)';
+    document.querySelector('.logo').textContent = '💡';
+
+    msgEl.innerHTML =
+      '<strong>💡 Cuéntanos tus aprendizajes del evento</strong><br><br>' +
+      'Responde estas preguntas en voz alta:<br><br>' +
+      '<strong>1. ¿Qué aprendí?</strong><br>' +
+      '<strong>2. ¿Cuáles fueron los principales temas y aprendizajes del evento?</strong><br>' +
+      '<strong>3. ¿Cómo podría aplicar esa práctica en el trabajo y en la vida personal?</strong><br><br>' +
+      '<em>→ Habla con calma y ejemplos concretos. No hay respuestas correctas ni incorrectas.</em>';
+    msgEl.style.display = 'block';
+    return;
+  }
   
   let mensaje = '';
   
